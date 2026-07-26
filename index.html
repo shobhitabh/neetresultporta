@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scorecard Viewer - Login</title>
+  <style>
+    body{font-family: Arial, Helvetica, sans-serif; background:#f3f4f6; margin:0; display:flex; align-items:center; justify-content:center; height:100vh}
+    .card{background:#fff; padding:28px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.08); width:360px}
+    label{display:block; margin:10px 0 6px; font-size:14px}
+    input[type=text], input[type=password]{width:100%; padding:10px; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box}
+    button{margin-top:16px; width:100%; padding:10px; background:#0b63c6; color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer}
+    .note{font-size:12px;color:#6b7280;margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="card" id="loginCard">
+    <h2 style="margin:0 0 10px">Login to view scorecard</h2>
+    <label for="appno">Application No.</label>
+    <input id="appno" type="text" placeholder="Enter application number" />
+    <label for="pwd">Password</label>
+    <input id="pwd" type="password" placeholder="Enter password" />
+    <button id="loginBtn">Login</button>
+    <div class="note">Use an actual image file named <strong>sample.jpg</strong> in the repository root.</div>
+  </div>
+
+<script>
+/* Replace these with whichever credentials you want to accept */
+const EXPECT_APP = '260410764040';
+const EXPECT_PWD = 'Ssas@#9334';
+
+/* on success we open the image in a fullscreen overlay */
+function openImageFullScreen(src) {
+  const overlay = document.createElement('div');
+  overlay.id = 'fullOverlay';
+  Object.assign(overlay.style, {
+    position: 'fixed', inset: '0', background: '#000', display: 'flex',
+    alignItems: 'center', justifyContent: 'center', zIndex: 2147483647
+  });
+
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = 'Scorecard';
+  Object.assign(img.style, { maxWidth: '100%', maxHeight: '100%', boxShadow: '0 6px 24px rgba(0,0,0,0.6)' });
+  overlay.appendChild(img);
+
+  const close = document.createElement('button');
+  close.textContent = 'Close';
+  Object.assign(close.style, {
+    position:'absolute', top:'12px', right:'12px', padding:'8px 12px', fontSize:'14px',
+    background:'rgba(255,255,255,0.9)', border:'none', borderRadius:'6px', cursor:'pointer'
+  });
+  close.addEventListener('click', removeOverlay);
+  overlay.appendChild(close);
+
+  function onKey(e){ if (e.key === 'Escape') removeOverlay(); }
+  document.addEventListener('keydown', onKey);
+
+  function removeOverlay() {
+    document.removeEventListener('keydown', onKey);
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.().catch(()=>{});
+    }
+    overlay.remove();
+  }
+
+  document.body.appendChild(overlay);
+  // request fullscreen (may be blocked if not triggered by user gesture)
+  overlay.requestFullscreen?.().catch(()=>{});
+}
+
+/* login handler */
+document.getElementById('loginBtn').addEventListener('click', function (e) {
+  const a = document.getElementById('appno').value.trim();
+  const p = document.getElementById('pwd').value;
+  if (a === EXPECT_APP && p === EXPECT_PWD) {
+    // show the image full-screen instead of opening a new tab
+    openImageFullScreen('sample.jpg');
+  } else {
+    alert('Invalid application number or password.');
+  }
+});
+</script>
+</body>
+</html>
