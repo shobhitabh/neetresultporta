@@ -42,10 +42,7 @@
     .viewer-stage .img-wrap{display:inline-block;position:relative}
     .viewer-stage img{display:block;max-width:none;max-height:none;transform-origin:center center}
 
-    /* make toolbar look like PDF viewer top bar (dark) */
     .icon{width:18px;height:18px;display:inline-block}
-
-    /* small helpers */
     .sep{width:1px;height:28px;background:rgba(255,255,255,0.08);margin:0 8px}
 
     @media (max-width:720px){.viewer-toolbar .center{display:none}}
@@ -147,42 +144,46 @@
   let rotation = 0; // degrees
 
   function updateZoomDisplay(){ zoomDisplay.textContent = Math.round(scale*100) + '%'; }
-
   function applyTransforms(){ viewerImg.style.transform = `scale(${scale}) rotate(${rotation}deg)`; }
 
-  // avoid upscaling on show unless user requests zoom > intrinsic
+  // REQUESTED starting zoom (175%)
+  const REQUESTED_START_SCALE = 1.75;
+
+  // show viewer and apply default fit/scale
   function showViewer(){
     viewer.style.display = 'flex'; viewer.setAttribute('aria-hidden','false');
-    // reset transforms and compute default fit: fit width but not upscale
-    rotation = 0; scale = 1;
-    viewerImg.style.transform = 'none';
-    // ensure image loaded to read naturalWidth / naturalHeight
+    rotation = 0; scale = 1; viewerImg.style.transform = 'none';
     if(viewerImg.complete){ applyDefaultFit(); }
     else { viewerImg.onload = () => applyDefaultFit(); }
   }
 
+  // apply default fit but start at requested 175% when safe; never upscale beyond intrinsic size
   function applyDefaultFit(){
-    // Fit width by default, but don't upscale beyond natural size
-    const vw = window.innerWidth - 40; // account for padding/toolbars
-    const intrinsicW = viewerImg.naturalWidth;
-    const intrinsicH = viewerImg.naturalHeight;
-    if(!intrinsicW || !intrinsicH){ scale = 1; applyTransforms(); updateZoomDisplay(); return; }
-    // desired width is viewport width; only scale down if intrinsicW > vw
-    if(intrinsicW > vw){ scale = vw / intrinsicW; }
-    else { scale = 1; }
-    rotation = 0; applyTransforms(); updateZoomDisplay();
+    const iw = viewerImg.naturalWidth; const ih = viewerImg.naturalHeight;
+    const vw = Math.max(100, window.innerWidth - 40);
+    const vh = Math.max(100, window.innerHeight - 100);
+    if(!iw || !ih){ scale = Math.min(1, REQUESTED_START_SCALE); rotation = 0; applyTransforms(); updateZoomDisplay(); return; }
+
+    // Start with requested scale
+    let s = REQUESTED_START_SCALE;
+
+    // Do not upscale beyond intrinsic size: cap s to 1 (intrinsic) if requested >1 and image intrinsic is small
+    if(iw * s > iw){ s = Math.min(s, 1); }
+
+    // If scaled width/height exceed viewport, scale down to fit
+    if(iw * s > vw) s = vw / iw;
+    if(ih * s > vh) s = Math.min(s, vh / ih);
+
+    s = Math.max(0.05, s);
+    scale = s; rotation = 0; applyTransforms(); updateZoomDisplay();
   }
 
   // Zoom controls
   function zoomIn(){ scale = Math.min(scale * 1.25, 5); applyTransforms(); updateZoomDisplay(); }
   function zoomOut(){ scale = Math.max(scale / 1.25, 0.1); applyTransforms(); updateZoomDisplay(); }
   function fitWidth(){ const vw = window.innerWidth - 40; const iw = viewerImg.naturalWidth; if(iw){ scale = iw > vw ? vw/iw : 1; applyTransforms(); updateZoomDisplay(); } }
-  function fitScreen(){ // fit both directions
-    const vw = window.innerWidth - 40; const vh = window.innerHeight - 100; const iw = viewerImg.naturalWidth; const ih = viewerImg.naturalHeight; if(!iw) return; const sx = vw/iw; const sy = vh/ih; scale = Math.min(1, Math.min(sx, sy)); applyTransforms(); updateZoomDisplay(); }
-  function actualSize(){ const iw = viewerImg.naturalWidth; if(!iw) return; scale = 1; // show at intrinsic size
-    // if intrinsic height exceeds viewport, scale down by height
-    if(viewerImg.naturalHeight > (window.innerHeight - 100)){ scale = (window.innerHeight - 100) / viewerImg.naturalHeight; }
-    applyTransforms(); updateZoomDisplay(); }
+  function fitScreen(){ const vw = window.innerWidth - 40; const vh = window.innerHeight - 100; const iw = viewerImg.naturalWidth; const ih = viewerImg.naturalHeight; if(!iw) return; const sx = vw/iw; const sy = vh/ih; scale = Math.min(1, Math.min(sx, sy)); applyTransforms(); updateZoomDisplay(); }
+  function actualSize(){ const iw = viewerImg.naturalWidth; if(!iw) return; scale = 1; if(viewerImg.naturalHeight > (window.innerHeight - 100)){ scale = (window.innerHeight - 100) / viewerImg.naturalHeight; } applyTransforms(); updateZoomDisplay(); }
 
   document.getElementById('vb-zoom-in').addEventListener('click', zoomIn);
   document.getElementById('vb-zoom-out').addEventListener('click', zoomOut);
@@ -195,14 +196,11 @@
 
   document.getElementById('vb-rotate').addEventListener('click', ()=>{ rotation = (rotation + 90) % 360; applyTransforms(); });
 
-  // Allow keyboard controls while viewer open
   document.addEventListener('keydown', (e)=>{
     if(viewer.style.display !== 'flex') return;
     if(e.key === '+') zoomIn();
     if(e.key === '-') zoomOut();
     if(e.key === 'Escape') { viewer.style.display='none'; viewer.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
-    if(e.key === 'ArrowRight') {/* future: next page */}
-    if(e.key === 'ArrowLeft') {/* future: prev page */}
   });
 
   // Login flow
@@ -216,12 +214,10 @@
     const expected = DEMO_USERS[app];
     if(!expected || expected !== pwd){ msg.textContent='Invalid application number or password.'; setCaptcha(); return; }
     msg.style.color='green'; msg.textContent='Login successful — opening score card.';
-    // show viewer overlay
     document.body.style.overflow='hidden';
     showViewer();
   });
 
-  // Recalculate fit on resize
   window.addEventListener('resize', ()=>{ if(viewer.style.display === 'flex') applyDefaultFit(); });
 </script>
 </body>
