@@ -3,83 +3,130 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Scorecard Viewer - Login</title>
+  <title>NEET Scorecard - Login</title>
   <style>
-    body{font-family: Arial, Helvetica, sans-serif; background:#f3f4f6; margin:0; display:flex; align-items:center; justify-content:center; height:100vh}
-    .card{background:#fff; padding:28px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.08); width:360px}
-    label{display:block; margin:10px 0 6px; font-size:14px}
-    input[type=text], input[type=password]{width:100%; padding:10px; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box}
-    button{margin-top:16px; width:100%; padding:10px; background:#0b63c6; color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer}
-    .note{font-size:12px;color:#6b7280;margin-top:10px}
+    :root{--navy:#07243a;--green:#2f9a4a;--muted:#6b7280}
+    html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;background:#fff}
+    header{background:linear-gradient(#fff,#fff);padding:18px 24px;border-bottom:8px solid var(--navy)}
+    header .title{max-width:980px;margin:0 auto;text-align:center}
+    header h1{margin:0;font-size:18px;color:#0b1630}
+
+    main{min-height:calc(100vh - 120px);display:flex;align-items:center;justify-content:center}
+    .card{width:720px;max-width:96%;border:1px solid #e5e7eb;border-radius:4px;box-shadow:0 6px 20px rgba(0,0,0,0.06)}
+    .card .card-head{background:var(--navy);color:#fff;padding:14px 18px;border-radius:4px 4px 0 0;font-weight:600}
+    .card .card-body{padding:26px;background:#fff}
+    .row{display:flex;align-items:center;margin-bottom:12px}
+    .row label{width:200px;color:#0b1630}
+    .row input[type=text],.row input[type=password]{flex:1;padding:10px;border:1px solid #d1d5db;border-radius:4px}
+    .row.small label{width:150px}
+
+    .captcha-box{display:flex;align-items:center;gap:12px;margin:8px 0}
+    .captcha-code{background:#071a58;color:#fff;padding:8px 12px;font-weight:700;border-radius:3px;letter-spacing:1px;font-size:18px}
+    .captcha-refresh{width:34px;height:34px;background:transparent;border:none;cursor:pointer}
+    .captcha-refresh svg{width:100%;height:100%}
+
+    .actions{display:flex;align-items:center;justify-content:space-between;margin-top:18px}
+    .btn{padding:10px 18px;border-radius:4px;border:none;cursor:pointer}
+    .btn-login{background:var(--green);color:#fff}
+    .forgot{color:#09357c;text-decoration:underline}
+
+    .note{font-size:13px;color:var(--muted);margin-top:6px}
+    .message{margin-top:8px;color:#b91c1c;font-weight:600}
+
+    footer{background:var(--navy);color:#fff;padding:10px 18px;text-align:center}
+
+    /* responsive */
+    @media (max-width:720px){.row label{display:none;width:auto} .row{flex-direction:column;align-items:stretch} .actions{flex-direction:column;gap:8px}}
   </style>
 </head>
 <body>
-  <div class="card" id="loginCard">
-    <h2 style="margin:0 0 10px">Login to view scorecard</h2>
-    <label for="appno">Application No.</label>
-    <input id="appno" type="text" placeholder="Enter application number" />
-    <label for="pwd">Password</label>
-    <input id="pwd" type="password" placeholder="Enter password" />
-    <button id="loginBtn">Login</button>
-    <div class="note">Use an actual image file named <strong>sample.jpg</strong> in the repository root.</div>
-  </div>
+  <header>
+    <div class="title">
+      <h1>NATIONAL ELIGIBILITY CUM ENTRANCE TEST (UG) – 2026 &nbsp; &nbsp; <small style="color:#475569;font-weight:400">Score Card Viewer (Demo)</small></h1>
+    </div>
+  </header>
+
+  <main>
+    <div class="card" role="main">
+      <div class="card-head">🔒 View Result</div>
+      <div class="card-body">
+        <div class="row"><label for="appno">Application Number :</label><input id="appno" type="text" placeholder="Enter application number" autocomplete="off"></div>
+        <div class="row"><label for="pwd">Password :</label><input id="pwd" type="password" placeholder="Enter password"></div>
+        <div class="row small"><label for="capInput">Enter CAPTCHA(<span style="color:green">case sensitive</span>) :</label><input id="capInput" type="text" placeholder="Type CAPTCHA exactly"></div>
+
+        <div style="display:flex;align-items:center;justify-content:flex-start;margin-top:6px">
+          <div style="width:200px;color:#0b1630;font-weight:600">CAPTCHA :</div>
+          <div style="flex:1">
+            <div class="captcha-box">
+              <div id="captchaCode" class="captcha-code">--</div>
+              <button id="refreshBtn" class="captcha-refresh" title="Refresh CAPTCHA" aria-label="Refresh CAPTCHA">
+                <!-- refresh icon -->
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 10-8.95 9" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button id="loginBtn" class="btn btn-login">LOGIN</button>
+            <span class="note">&nbsp;</span>
+          </div>
+          <div><a class="forgot" href="#">Forgot Password ?</a></div>
+        </div>
+
+        <div id="message" class="message" aria-live="polite"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>This site is a demo. For any further information, contact the repository owner.</footer>
 
 <script>
-/* Replace these with whichever credentials you want to accept */
-const EXPECT_APP = '260410764040';
-const EXPECT_PWD = 'Ssas@#9334';
+  // Demo valid credentials (client-side demo only)
+  const DEMO_USERS = {"260410764040":"Ssas@#9334"};
 
-/* on success we open the image in a fullscreen overlay */
-function openImageFullScreen(src) {
-  const overlay = document.createElement('div');
-  overlay.id = 'fullOverlay';
-  Object.assign(overlay.style, {
-    position: 'fixed', inset: '0', background: '#000', display: 'flex',
-    alignItems: 'center', justifyContent: 'center', zIndex: 2147483647
+  // CAPTCHA generation and rendering
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  function randomChar(){ return chars.charAt(Math.floor(Math.random()*chars.length)); }
+  function generateCaptcha(n=7){ let s=''; for(let i=0;i<n;i++) s+=randomChar(); return s; }
+
+  let currentCaptcha = '';
+  function drawCaptchaToElement(code){ const el = document.getElementById('captchaCode'); el.textContent = code; }
+  function refreshCaptcha(){ currentCaptcha = generateCaptcha(7); drawCaptchaToElement(currentCaptcha); document.getElementById('capInput').value=''; document.getElementById('message').textContent=''; }
+  document.getElementById('refreshBtn').addEventListener('click', refreshCaptcha);
+  refreshCaptcha();
+
+  // Allow enter to submit
+  ['appno','pwd','capInput'].forEach(id=>{
+    document.getElementById(id).addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('loginBtn').click(); } });
   });
 
-  const img = document.createElement('img');
-  img.src = src;
-  img.alt = 'Scorecard';
-  Object.assign(img.style, { maxWidth: '100%', maxHeight: '100%', boxShadow: '0 6px 24px rgba(0,0,0,0.6)' });
-  overlay.appendChild(img);
-
-  const close = document.createElement('button');
-  close.textContent = 'Close';
-  Object.assign(close.style, {
-    position:'absolute', top:'12px', right:'12px', padding:'8px 12px', fontSize:'14px',
-    background:'rgba(255,255,255,0.9)', border:'none', borderRadius:'6px', cursor:'pointer'
-  });
-  close.addEventListener('click', removeOverlay);
-  overlay.appendChild(close);
-
-  function onKey(e){ if (e.key === 'Escape') removeOverlay(); }
-  document.addEventListener('keydown', onKey);
-
-  function removeOverlay() {
-    document.removeEventListener('keydown', onKey);
-    if (document.fullscreenElement) {
-      document.exitFullscreen?.().catch(()=>{});
-    }
-    overlay.remove();
+  function openImageFullScreen(src){
+    const overlay = document.createElement('div');
+    Object.assign(overlay.style,{position:'fixed',inset:'0',background:'#000',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2147483647});
+    const img = document.createElement('img'); img.src = src; img.alt='Scorecard'; Object.assign(img.style,{maxWidth:'100%',maxHeight:'100%'});
+    overlay.appendChild(img);
+    const close = document.createElement('button'); close.textContent='Close'; Object.assign(close.style,{position:'absolute',top:'12px',right:'12px',padding:'8px 12px',background:'#fff',borderRadius:'6px',border:'none',cursor:'pointer'});
+    close.addEventListener('click', ()=>{ document.body.removeChild(overlay); }); overlay.appendChild(close);
+    document.body.appendChild(overlay);
+    try{ overlay.requestFullscreen?.(); }catch(e){}
+    document.addEventListener('keydown', function esc(e){ if(e.key==='Escape'){ if(document.fullscreenElement) document.exitFullscreen?.(); if(document.body.contains(overlay)) document.body.removeChild(overlay); document.removeEventListener('keydown', esc); }});
   }
 
-  document.body.appendChild(overlay);
-  // request fullscreen (may be blocked if not triggered by user gesture)
-  overlay.requestFullscreen?.().catch(()=>{});
-}
-
-/* login handler */
-document.getElementById('loginBtn').addEventListener('click', function (e) {
-  const a = document.getElementById('appno').value.trim();
-  const p = document.getElementById('pwd').value;
-  if (a === EXPECT_APP && p === EXPECT_PWD) {
-    // show the image full-screen instead of opening a new tab
+  document.getElementById('loginBtn').addEventListener('click', ()=>{
+    const a = document.getElementById('appno').value.trim();
+    const p = document.getElementById('pwd').value;
+    const ent = document.getElementById('capInput').value.trim();
+    const msg = document.getElementById('message'); msg.style.color='#b91c1c';
+    if(!a || !p || !ent){ msg.textContent='Please fill all fields.'; return; }
+    if(ent !== currentCaptcha){ msg.textContent='CAPTCHA incorrect. Click refresh and try again.'; refreshCaptcha(); return; }
+    const expected = DEMO_USERS[a];
+    if(!expected || expected !== p){ msg.textContent='Invalid application number or password.'; refreshCaptcha(); return; }
+    msg.style.color='green'; msg.textContent='Login successful — opening score card.';
+    // Open image
     openImageFullScreen('sample.jpg');
-  } else {
-    alert('Invalid application number or password.');
-  }
-});
+  });
 </script>
 </body>
 </html>
