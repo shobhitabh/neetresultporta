@@ -5,219 +5,207 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>NEET - View Result</title>
   <style>
-    :root{--navy:#06243f;--green:#1f8a4d;--muted:#6b7280;--bluecap:#071a58}
+    :root{--navy:#06243f;--green:#1f8a4d;--muted:#6b7280;--bluecap:#071a58;--overlay-bg:rgba(20,20,20,0.95)}
     body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#fff;color:#0b1630}
-
-    /* Top logo strip */
     .top-strip{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:10px solid var(--navy)}
     .title-wrap{position:absolute;left:50%;transform:translateX(-50%);text-align:center}
     .title-wrap h2{margin:4px 0 0;font-size:18px;letter-spacing:0.5px}
-    .title-wrap p{margin:0;font-size:14px;color:#0b1630}
 
     main{min-height:calc(100vh - 150px);display:flex;align-items:center;justify-content:center;padding:30px}
 
-    /* Card */
     .card{width:700px;max-width:95%;border:1px solid #e6e9ee;border-radius:2px;box-shadow:0 8px 30px rgba(2,6,23,0.06);overflow:hidden}
     .card-head{background:var(--navy);color:#fff;padding:14px 20px;font-weight:700;display:flex;align-items:center;gap:12px}
-    .card-head .lock{background:#0b2a46;padding:8px;border-radius:4px}
     .card-body{background:#fff;padding:26px}
 
     .form-row{display:flex;align-items:center;margin:12px 0}
     .form-row label{width:220px;color:#0b1630;font-weight:600}
     .form-row input{flex:1;padding:10px;border:1px solid #d1d5db;border-radius:3px;font-size:14px}
-    .form-row.small label{width:220px}
 
-    /* captcha area */
-    .captcha-line{display:flex;align-items:center;gap:12px;margin:8px 0}
     .captcha-box{background:var(--bluecap);color:#fff;padding:10px 14px;border-radius:2px;font-weight:700;font-size:18px;letter-spacing:1px}
-    .refresh-btn{width:36px;height:36px;background:#eaf6ef;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
-    .refresh-btn svg{width:18px;height:18px;fill:none;stroke:#16a34a;stroke-width:2}
-
-    .actions{display:flex;align-items:center;justify-content:space-between;margin-top:18px}
-    .left-actions{display:flex;align-items:center;gap:12px}
-    .btn{padding:10px 18px;border-radius:4px;border:none;cursor:pointer}
-    .btn-login{background:var(--green);color:#fff;font-weight:700}
-    .forgot{color:#09357c;text-decoration:underline;font-weight:600}
-
-    .note{font-size:13px;color:var(--muted)}
-    .message{margin-top:8px;color:#b91c1c;font-weight:700}
 
     footer{background:var(--navy);color:#fff;padding:14px 18px;text-align:center;font-size:13px}
 
-    /* overlay styles for fullscreen viewing */
-    .score-overlay{
-      position:fixed; inset:0; background:#000; display:flex; align-items:center; justify-content:center; z-index:2147483647; overflow:auto;
-    }
-    .score-overlay img{
-      /* horizontal full view but do not upscale beyond intrinsic size */
-      width:auto; height:auto; max-width:100vw; max-height:100vh; display:block;
-    }
-    .score-overlay .close-btn{
-      position:fixed; top:12px; right:12px; padding:10px 14px; background:#ffffff; color:#000; border-radius:6px; border:none; cursor:pointer; font-weight:700; box-shadow:0 6px 18px rgba(0,0,0,0.2);
-      z-index:2147483650;
-    }
-    .overlay-tools{
-      position:fixed; top:12px; left:12px; display:flex; gap:8px; z-index:2147483650;
-    }
-    .overlay-tools button{padding:8px 10px;border-radius:6px;border:none;cursor:pointer;background:rgba(255,255,255,0.95)}
+    /* overlay viewer */
+    .viewer-overlay{position:fixed;inset:0;display:none;flex-direction:column;background:var(--overlay-bg);z-index:99999}
+    .viewer-toolbar{height:48px;background:#333;color:#fff;display:flex;align-items:center;gap:8px;padding:6px 10px}
+    .viewer-toolbar .left, .viewer-toolbar .center, .viewer-toolbar .right{display:flex;align-items:center;gap:8px}
+    .viewer-toolbar .left{flex:0}
+    .viewer-toolbar .center{flex:1;justify-content:center}
+    .viewer-toolbar .right{flex:0}
 
-    @media (max-width:720px){.form-row label{display:none;width:auto}.form-row{flex-direction:column;align-items:stretch}}
+    .viewer-toolbar button{background:transparent;border:none;color:#fff;padding:6px 8px;border-radius:4px;cursor:pointer}
+    .viewer-toolbar button:hover{background:rgba(255,255,255,0.06)}
+    .viewer-toolbar .label{color:#ddd;font-weight:600}
+    .zoom-display{min-width:56px;text-align:center}
+
+    .viewer-stage{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;padding:18px}
+    .viewer-stage .img-wrap{display:inline-block;position:relative}
+    .viewer-stage img{display:block;max-width:none;max-height:none;transform-origin:center center}
+
+    /* make toolbar look like PDF viewer top bar (dark) */
+    .icon{width:18px;height:18px;display:inline-block}
+
+    /* small helpers */
+    .sep{width:1px;height:28px;background:rgba(255,255,255,0.08);margin:0 8px}
+
+    @media (max-width:720px){.viewer-toolbar .center{display:none}}
   </style>
 </head>
 <body>
   <div class="top-strip">
-    <div class="left">
-      <div style="width:72px;height:48px;background:url('https://upload.wikimedia.org/wikipedia/commons/4/4f/Emblem_of_India.svg') center/contain no-repeat"></div>
-    </div>
-
+    <div style="width:72px;height:48px;background:url('https://upload.wikimedia.org/wikipedia/commons/4/4f/Emblem_of_India.svg') center/contain no-repeat"></div>
     <div class="title-wrap">
       <h2>NATIONAL ELIGIBILITY CUM ENTRANCE TEST (UG) – 2026</h2>
       <p style="margin-top:6px;font-weight:600">Score Card</p>
     </div>
-
-    <div class="right">
-      <div style="width:120px;height:48px;background:url('https://upload.wikimedia.org/wikipedia/commons/2/22/National_Testing_Agency_logo.png') center/contain no-repeat"></div>
-    </div>
+    <div style="width:120px;height:48px;background:url('https://upload.wikimedia.org/wikipedia/commons/2/22/National_Testing_Agency_logo.png') center/contain no-repeat"></div>
   </div>
 
   <main>
     <div class="card" role="main">
-      <div class="card-head"><div class="lock">🔒</div> View Result</div>
+      <div class="card-head">🔒 View Result</div>
       <div class="card-body">
-
         <div class="form-row"><label for="appno">Application Number :</label><input id="appno" type="text" placeholder="Enter application number" autocomplete="off"></div>
         <div class="form-row"><label for="pwd">Password :</label><input id="pwd" type="password" placeholder="Enter password"></div>
-        <div class="form-row small"><label for="capInput">Enter CAPTCHA(<span style="color:green">case sensitive</span>) :</label><input id="capInput" type="text" placeholder="Type CAPTCHA exactly"></div>
-
+        <div class="form-row"><label for="capInput">Enter CAPTCHA(<span style="color:green">case sensitive</span>) :</label><input id="capInput" type="text" placeholder="Type CAPTCHA exactly"></div>
         <div style="display:flex;align-items:center;justify-content:flex-start;margin-top:6px">
           <div style="width:220px;color:#0b1630;font-weight:600">CAPTCHA :</div>
-          <div style="flex:1">
-            <div class="captcha-line">
-              <div id="captchaCode" class="captcha-box">--</div>
-              <button id="refreshBtn" class="refresh-btn" title="Refresh CAPTCHA" aria-label="Refresh CAPTCHA">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 10-8.95 9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
+          <div style="flex:1;display:flex;gap:12px;align-items:center">
+            <div id="captchaCode" class="captcha-box">--</div>
+            <button id="refreshBtn" title="Refresh CAPTCHA" aria-label="Refresh CAPTCHA" style="padding:8px;border-radius:6px;border:none;background:#eaf6ef;cursor:pointer">⟳</button>
           </div>
         </div>
 
-        <div class="actions">
-          <div class="left-actions">
-            <button id="loginBtn" class="btn btn-login">LOGIN</button>
-            <div class="note">&nbsp;</div>
-          </div>
-          <div><a class="forgot" href="#">Forgot Password ?</a></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px">
+          <div style="display:flex;gap:12px;align-items:center"><button id="loginBtn" style="background:var(--green);color:#fff;padding:10px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:700">LOGIN</button></div>
+          <div><a href="#" style="color:#09357c;text-decoration:underline;font-weight:600">Forgot Password ?</a></div>
         </div>
 
-        <div id="message" class="message" aria-live="polite"></div>
-
+        <div id="message" style="margin-top:10px;color:#b91c1c;font-weight:700" aria-live="polite"></div>
       </div>
     </div>
   </main>
 
   <footer>This site is designed and hosted by NIC. The contents are provided by NTA. For any further information, please contact NTA.</footer>
 
+  <!-- Viewer overlay (hidden until login) -->
+  <div id="viewer" class="viewer-overlay" role="dialog" aria-hidden="true">
+    <div class="viewer-toolbar">
+      <div class="left">
+        <button id="vb-close" title="Close viewer">✕</button>
+        <div class="sep"></div>
+        <button id="vb-prev" title="Previous page" disabled>◀</button>
+        <button id="vb-next" title="Next page" disabled>▶</button>
+        <div class="sep"></div>
+        <div class="label" id="pageLabel">1 / 1</div>
+      </div>
+
+      <div class="center">
+        <button id="vb-zoom-out" title="Zoom out">−</button>
+        <div class="zoom-display" id="zoomDisplay">100%</div>
+        <button id="vb-zoom-in" title="Zoom in">+</button>
+        <div class="sep"></div>
+        <button id="vb-fit-width" title="Fit width">Fit width</button>
+        <button id="vb-fit-screen" title="Fit screen">Fit screen</button>
+        <button id="vb-actual" title="Actual size">Actual size</button>
+      </div>
+
+      <div class="right">
+        <button id="vb-rotate" title="Rotate">⤾</button>
+        <div class="sep"></div>
+        <a id="vb-download" href="sample.jpg" download target="_blank" style="color:#fff;text-decoration:none"><button title="Download">↓</button></a>
+        <button id="vb-print" title="Print">🖨</button>
+      </div>
+    </div>
+
+    <div class="viewer-stage" id="viewerStage">
+      <div class="img-wrap"><img id="viewerImg" src="sample.jpg" alt="scorecard"></div>
+    </div>
+  </div>
+
 <script>
-  /* Demo credentials */
+  // Demo credentials
   const DEMO_USERS = {"260410764040":"Ssas@#9334"};
 
+  // CAPTCHA generator
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
-  function randomChar(){ return chars.charAt(Math.floor(Math.random()*chars.length)); }
-  function generateCaptcha(len=7){ let s=''; for(let i=0;i<len;i++) s+=randomChar(); return s; }
+  function rand(n){ return chars.charAt(Math.floor(Math.random()*chars.length)); }
+  function genCaptcha(len=7){ let s=''; for(let i=0;i<len;i++) s+=rand(); return s; }
 
   let currentCaptcha = '';
-  function setCaptcha(){ currentCaptcha = generateCaptcha(7); document.getElementById('captchaCode').textContent = currentCaptcha; document.getElementById('capInput').value=''; document.getElementById('message').textContent=''; }
+  function setCaptcha(){ currentCaptcha = genCaptcha(7); document.getElementById('captchaCode').textContent = currentCaptcha; document.getElementById('capInput').value = ''; document.getElementById('message').textContent = ''; }
   document.getElementById('refreshBtn').addEventListener('click', setCaptcha);
   setCaptcha();
 
-  ['appno','pwd','capInput'].forEach(id=>{
-    document.getElementById(id).addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('loginBtn').click(); } });
-  });
+  // Viewer elements
+  const viewer = document.getElementById('viewer');
+  const viewerImg = document.getElementById('viewerImg');
+  const zoomDisplay = document.getElementById('zoomDisplay');
 
-  function openImageFullScreen(src){
-    // create overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'score-overlay';
+  // viewer state
+  let scale = 1; // 1 = 100%
+  let rotation = 0; // degrees
 
-    // create image that fits horizontally but does not upscale beyond intrinsic size
-    const img = document.createElement('img');
-    img.src = src;
-    img.alt = 'Scorecard';
-    img.loading = 'eager';
+  function updateZoomDisplay(){ zoomDisplay.textContent = Math.round(scale*100) + '%'; }
 
-    // tools: fit width / fit screen / actual size
-    const tools = document.createElement('div');
-    tools.className = 'overlay-tools';
+  function applyTransforms(){ viewerImg.style.transform = `scale(${scale}) rotate(${rotation}deg)`; }
 
-    const fitWidthBtn = document.createElement('button'); fitWidthBtn.textContent = 'Fit width';
-    const fitScreenBtn = document.createElement('button'); fitScreenBtn.textContent = 'Fit screen';
-    const actualBtn = document.createElement('button'); actualBtn.textContent = 'Actual size';
-
-    tools.appendChild(fitWidthBtn); tools.appendChild(fitScreenBtn); tools.appendChild(actualBtn);
-
-    // close button
-    const close = document.createElement('button');
-    close.className = 'close-btn';
-    close.textContent = 'CLOSE';
-    close.addEventListener('click', removeOverlay);
-
-    overlay.appendChild(img);
-    overlay.appendChild(tools);
-    overlay.appendChild(close);
-
-    // prevent body scroll while overlay visible
-    document.body.style.overflow = 'hidden';
-    document.body.appendChild(overlay);
-
-    // helpers to set sizing safely
-    function fitWidth(){
-      // only scale to viewport width if intrinsic width >= viewport width, otherwise use intrinsic width (avoid upscaling)
-      if(img.naturalWidth >= window.innerWidth){ img.style.width = window.innerWidth + 'px'; img.style.height = 'auto'; }
-      else { img.style.width = img.naturalWidth + 'px'; img.style.height = 'auto'; }
-    }
-    function fitScreen(){
-      // fit to available viewport both directions while preserving aspect ratio
-      const vw = window.innerWidth, vh = window.innerHeight;
-      // if image is taller than viewport when scaled to width, constrain by height
-      img.style.width = 'auto'; img.style.height = 'auto';
-      const widthIfFit = Math.min(img.naturalWidth, vw);
-      const heightIfFit = Math.min(img.naturalHeight, vh);
-      // choose scaling that makes it fit entirely
-      img.style.maxWidth = '100vw'; img.style.maxHeight = '100vh'; img.style.width = 'auto'; img.style.height = 'auto';
-    }
-    function actualSize(){
-      img.style.width = img.naturalWidth + 'px'; img.style.height = 'auto';
-      // if actual height exceeds viewport, clamp height instead
-      if(img.naturalHeight > window.innerHeight){ img.style.height = window.innerHeight + 'px'; img.style.width = 'auto'; }
-    }
-
-    fitWidthBtn.addEventListener('click', fitWidth);
-    fitScreenBtn.addEventListener('click', fitScreen);
-    actualBtn.addEventListener('click', actualSize);
-
-    // default: fit width but avoid upscaling
-    img.addEventListener('load', ()=>{ fitWidth(); });
-
-    // attempt fullscreen (optional)
-    overlay.requestFullscreen?.().catch(()=>{});
-
-    function removeOverlay(){
-      if(document.fullscreenElement) document.exitFullscreen?.().catch(()=>{});
-      if(document.body.contains(overlay)) overlay.remove();
-      document.body.style.overflow = '';
-    }
-
-    // allow Esc to close
-    function onKey(e){ if(e.key === 'Escape') removeOverlay(); }
-    document.addEventListener('keydown', onKey);
-
-    // cleanup on remove
-    overlay.addEventListener('remove', ()=>{ document.removeEventListener('keydown', onKey); });
-
-    // handle resize to reapply fitWidth/fitScreen if visible
-    window.addEventListener('resize', ()=>{ if(document.body.contains(overlay)) fitWidth(); });
+  // avoid upscaling on show unless user requests zoom > intrinsic
+  function showViewer(){
+    viewer.style.display = 'flex'; viewer.setAttribute('aria-hidden','false');
+    // reset transforms and compute default fit: fit width but not upscale
+    rotation = 0; scale = 1;
+    viewerImg.style.transform = 'none';
+    // ensure image loaded to read naturalWidth / naturalHeight
+    if(viewerImg.complete){ applyDefaultFit(); }
+    else { viewerImg.onload = () => applyDefaultFit(); }
   }
 
+  function applyDefaultFit(){
+    // Fit width by default, but don't upscale beyond natural size
+    const vw = window.innerWidth - 40; // account for padding/toolbars
+    const intrinsicW = viewerImg.naturalWidth;
+    const intrinsicH = viewerImg.naturalHeight;
+    if(!intrinsicW || !intrinsicH){ scale = 1; applyTransforms(); updateZoomDisplay(); return; }
+    // desired width is viewport width; only scale down if intrinsicW > vw
+    if(intrinsicW > vw){ scale = vw / intrinsicW; }
+    else { scale = 1; }
+    rotation = 0; applyTransforms(); updateZoomDisplay();
+  }
+
+  // Zoom controls
+  function zoomIn(){ scale = Math.min(scale * 1.25, 5); applyTransforms(); updateZoomDisplay(); }
+  function zoomOut(){ scale = Math.max(scale / 1.25, 0.1); applyTransforms(); updateZoomDisplay(); }
+  function fitWidth(){ const vw = window.innerWidth - 40; const iw = viewerImg.naturalWidth; if(iw){ scale = iw > vw ? vw/iw : 1; applyTransforms(); updateZoomDisplay(); } }
+  function fitScreen(){ // fit both directions
+    const vw = window.innerWidth - 40; const vh = window.innerHeight - 100; const iw = viewerImg.naturalWidth; const ih = viewerImg.naturalHeight; if(!iw) return; const sx = vw/iw; const sy = vh/ih; scale = Math.min(1, Math.min(sx, sy)); applyTransforms(); updateZoomDisplay(); }
+  function actualSize(){ const iw = viewerImg.naturalWidth; if(!iw) return; scale = 1; // show at intrinsic size
+    // if intrinsic height exceeds viewport, scale down by height
+    if(viewerImg.naturalHeight > (window.innerHeight - 100)){ scale = (window.innerHeight - 100) / viewerImg.naturalHeight; }
+    applyTransforms(); updateZoomDisplay(); }
+
+  document.getElementById('vb-zoom-in').addEventListener('click', zoomIn);
+  document.getElementById('vb-zoom-out').addEventListener('click', zoomOut);
+  document.getElementById('vb-fit-width').addEventListener('click', fitWidth);
+  document.getElementById('vb-fit-screen').addEventListener('click', fitScreen);
+  document.getElementById('vb-actual').addEventListener('click', actualSize);
+
+  document.getElementById('vb-close').addEventListener('click', ()=>{ viewer.style.display='none'; viewer.setAttribute('aria-hidden','true'); document.body.style.overflow=''; });
+  document.getElementById('vb-print').addEventListener('click', ()=>{ const w = window.open(); const imgHtml = `<img src="${viewerImg.src}" style="max-width:100%;height:auto">`; w.document.write('<html><head><title>Print</title></head><body style="margin:0;padding:10px;background:#fff">'+imgHtml+'</body></html>'); w.document.close(); w.focus(); w.print(); });
+
+  document.getElementById('vb-rotate').addEventListener('click', ()=>{ rotation = (rotation + 90) % 360; applyTransforms(); });
+
+  // Allow keyboard controls while viewer open
+  document.addEventListener('keydown', (e)=>{
+    if(viewer.style.display !== 'flex') return;
+    if(e.key === '+') zoomIn();
+    if(e.key === '-') zoomOut();
+    if(e.key === 'Escape') { viewer.style.display='none'; viewer.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+    if(e.key === 'ArrowRight') {/* future: next page */}
+    if(e.key === 'ArrowLeft') {/* future: prev page */}
+  });
+
+  // Login flow
   document.getElementById('loginBtn').addEventListener('click', ()=>{
     const app = document.getElementById('appno').value.trim();
     const pwd = document.getElementById('pwd').value;
@@ -228,8 +216,13 @@
     const expected = DEMO_USERS[app];
     if(!expected || expected !== pwd){ msg.textContent='Invalid application number or password.'; setCaptcha(); return; }
     msg.style.color='green'; msg.textContent='Login successful — opening score card.';
-    openImageFullScreen('sample.jpg');
+    // show viewer overlay
+    document.body.style.overflow='hidden';
+    showViewer();
   });
+
+  // Recalculate fit on resize
+  window.addEventListener('resize', ()=>{ if(viewer.style.display === 'flex') applyDefaultFit(); });
 </script>
 </body>
 </html>
