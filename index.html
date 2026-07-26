@@ -47,14 +47,23 @@
 
     footer{background:var(--navy);color:#fff;padding:14px 18px;text-align:center;font-size:13px}
 
+    /* overlay styles for fullscreen viewing */
+    .score-overlay{
+      position:fixed; inset:0; background:#000; display:flex; align-items:center; justify-content:center; z-index:2147483647;
+    }
+    .score-overlay img{
+      width:100vw; height:100vh; object-fit:contain; display:block; max-width:none; max-height:none;
+    }
+    .score-overlay .close-btn{
+      position:absolute; top:12px; right:12px; padding:10px 14px; background:#ffffff; color:#000; border-radius:6px; border:none; cursor:pointer; font-weight:700; box-shadow:0 6px 18px rgba(0,0,0,0.2);
+    }
+
     @media (max-width:720px){.form-row label{display:none;width:auto}.form-row{flex-direction:column;align-items:stretch}}
   </style>
 </head>
 <body>
   <div class="top-strip">
     <div class="left">
-      <!-- left logo (placeholder) -->
-      <img src="https://raw.githubusercontent.com/shobhitabh/neetresultporta/gh-pages/sample.jpg" alt="left" style="display:none">
       <div style="width:72px;height:48px;background:url('https://upload.wikimedia.org/wikipedia/commons/4/4f/Emblem_of_India.svg') center/contain no-repeat"></div>
     </div>
 
@@ -123,15 +132,44 @@
   });
 
   function openImageFullScreen(src){
+    // create overlay
     const overlay = document.createElement('div');
-    Object.assign(overlay.style,{position:'fixed',inset:'0',background:'#000',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2147483647});
-    const img = document.createElement('img'); img.src = src; img.alt = 'Scorecard'; Object.assign(img.style,{maxWidth:'100%',maxHeight:'100%',boxShadow:'0 6px 20px rgba(0,0,0,0.6)'});
+    overlay.className = 'score-overlay';
+
+    // create image that covers viewport while preserving aspect ratio
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'Scorecard';
+    img.loading = 'eager';
+
+    // close button
+    const close = document.createElement('button');
+    close.className = 'close-btn';
+    close.textContent = 'CLOSE';
+    close.addEventListener('click', removeOverlay);
+
     overlay.appendChild(img);
-    const close = document.createElement('button'); close.textContent='Close'; Object.assign(close.style,{position:'absolute',top:'12px',right:'12px',padding:'8px 12px',background:'#fff',borderRadius:'6px',border:'none',cursor:'pointer'});
-    close.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen?.(); overlay.remove(); }); overlay.appendChild(close);
+    overlay.appendChild(close);
+
+    // prevent body scroll while overlay visible
+    document.body.style.overflow = 'hidden';
     document.body.appendChild(overlay);
+
+    // attempt fullscreen (optional) but overlay already fills viewport
     overlay.requestFullscreen?.().catch(()=>{});
-    document.addEventListener('keydown', function esc(e){ if(e.key==='Escape'){ if(document.fullscreenElement) document.exitFullscreen?.(); if(document.body.contains(overlay)) overlay.remove(); document.removeEventListener('keydown', esc);} });
+
+    function removeOverlay(){
+      if(document.fullscreenElement) document.exitFullscreen?.().catch(()=>{});
+      if(document.body.contains(overlay)) overlay.remove();
+      document.body.style.overflow = '';
+    }
+
+    // allow Esc to close
+    function onKey(e){ if(e.key === 'Escape') removeOverlay(); }
+    document.addEventListener('keydown', onKey);
+
+    // remove key listener when overlay removed
+    overlay.addEventListener('remove', ()=>{ document.removeEventListener('keydown', onKey); });
   }
 
   document.getElementById('loginBtn').addEventListener('click', ()=>{
