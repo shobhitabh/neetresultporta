@@ -3,101 +3,121 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NEET Scorecard - Login</title>
+  <title>NEET - View Result</title>
   <style>
-    :root{--navy:#07243a;--green:#2f9a4a;--muted:#6b7280}
-    html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;background:#fff}
-    header{background:linear-gradient(#fff,#fff);padding:18px 24px;border-bottom:8px solid var(--navy)}
-    header .title{max-width:980px;margin:0 auto;text-align:center}
-    header h1{margin:0;font-size:18px;color:#0b1630}
+    :root{--navy:#06243f;--green:#1f8a4d;--muted:#6b7280;--bluecap:#071a58}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#fff;color:#0b1630}
 
-    main{min-height:calc(100vh - 120px);display:flex;align-items:center;justify-content:center}
-    .card{width:720px;max-width:96%;border:1px solid #e5e7eb;border-radius:4px;box-shadow:0 6px 20px rgba(0,0,0,0.06)}
-    .card .card-head{background:var(--navy);color:#fff;padding:14px 18px;border-radius:4px 4px 0 0;font-weight:600}
-    .card .card-body{padding:26px;background:#fff}
-    .row{display:flex;align-items:center;margin-bottom:12px}
-    .row label{width:200px;color:#0b1630}
-    .row input[type=text],.row input[type=password]{flex:1;padding:10px;border:1px solid #d1d5db;border-radius:4px}
-    .row.small label{width:150px}
+    /* Top logo strip */
+    .top-strip{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:10px solid var(--navy)}
+    .top-strip .left,.top-strip .right{display:flex;align-items:center;gap:12px}
+    .top-strip img{height:48px}
+    .title-wrap{position:absolute;left:50%;transform:translateX(-50%);text-align:center}
+    .title-wrap h2{margin:4px 0 0;font-size:18px;letter-spacing:0.5px}
+    .title-wrap p{margin:0;font-size:14px;color:#0b1630}
 
-    .captcha-box{display:flex;align-items:center;gap:12px;margin:8px 0}
-    .captcha-code{background:#071a58;color:#fff;padding:8px 12px;font-weight:700;border-radius:3px;letter-spacing:1px;font-size:18px}
-    .captcha-refresh{width:34px;height:34px;background:transparent;border:none;cursor:pointer}
-    .captcha-refresh svg{width:100%;height:100%}
+    main{min-height:calc(100vh - 150px);display:flex;align-items:center;justify-content:center;padding:30px}
+
+    /* Card */
+    .card{width:700px;max-width:95%;border:1px solid #e6e9ee;border-radius:2px;box-shadow:0 8px 30px rgba(2,6,23,0.06);overflow:hidden}
+    .card-head{background:var(--navy);color:#fff;padding:14px 20px;font-weight:700;display:flex;align-items:center;gap:12px}
+    .card-head .lock{background:#0b2a46;padding:8px;border-radius:4px}
+    .card-body{background:#fff;padding:26px}
+
+    .form-row{display:flex;align-items:center;margin:12px 0}
+    .form-row label{width:220px;color:#0b1630;font-weight:600}
+    .form-row input{flex:1;padding:10px;border:1px solid #d1d5db;border-radius:3px;font-size:14px}
+
+    .form-row.small label{width:220px}
+
+    /* captcha area */
+    .captcha-line{display:flex;align-items:center;gap:12px;margin:8px 0}
+    .captcha-box{background:var(--bluecap);color:#fff;padding:10px 14px;border-radius:2px;font-weight:700;font-size:18px;letter-spacing:1px}
+    .refresh-btn{width:36px;height:36px;background:#eaf6ef;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .refresh-btn svg{width:18px;height:18px;fill:none;stroke:#16a34a;stroke-width:2}
 
     .actions{display:flex;align-items:center;justify-content:space-between;margin-top:18px}
+    .left-actions{display:flex;align-items:center;gap:12px}
     .btn{padding:10px 18px;border-radius:4px;border:none;cursor:pointer}
-    .btn-login{background:var(--green);color:#fff}
-    .forgot{color:#09357c;text-decoration:underline}
+    .btn-login{background:var(--green);color:#fff;font-weight:700}
+    .forgot{color:#09357c;text-decoration:underline;font-weight:600}
 
-    .note{font-size:13px;color:var(--muted);margin-top:6px}
-    .message{margin-top:8px;color:#b91c1c;font-weight:600}
+    .note{font-size:13px;color:var(--muted)}
+    .message{margin-top:8px;color:#b91c1c;font-weight:700}
 
-    footer{background:var(--navy);color:#fff;padding:10px 18px;text-align:center}
+    footer{background:var(--navy);color:#fff;padding:14px 18px;text-align:center;font-size:13px}
 
-    /* responsive */
-    @media (max-width:720px){.row label{display:none;width:auto} .row{flex-direction:column;align-items:stretch} .actions{flex-direction:column;gap:8px}}
+    @media (max-width:720px){.form-row label{display:none;width:auto}.form-row{flex-direction:column;align-items:stretch}}
   </style>
 </head>
 <body>
-  <header>
-    <div class="title">
-      <h1>NATIONAL ELIGIBILITY CUM ENTRANCE TEST (UG) – 2026 &nbsp; &nbsp; <small style="color:#475569;font-weight:400">Score Card Viewer (Demo)</small></h1>
+  <div class="top-strip">
+    <div class="left">
+      <!-- left logo (placeholder) -->
+      <img src="https://raw.githubusercontent.com/shobhitabh/neetresultporta/gh-pages/sample.jpg" alt="left" style="display:none">
+      <div style="width:72px;height:48px;background:url('https://upload.wikimedia.org/wikipedia/commons/4/4f/Emblem_of_India.svg') center/contain no-repeat"></div>
     </div>
-  </header>
+
+    <div class="title-wrap">
+      <h2>NATIONAL ELIGIBILITY CUM ENTRANCE TEST (UG) – 2026</h2>
+      <p style="margin-top:6px;font-weight:600">Score Card</p>
+    </div>
+
+    <div class="right">
+      <div style="width:120px;height:48px;background:url('https://upload.wikimedia.org/wikipedia/commons/2/22/National_Testing_Agency_logo.png') center/contain no-repeat"></div>
+    </div>
+  </div>
 
   <main>
     <div class="card" role="main">
-      <div class="card-head">🔒 View Result</div>
+      <div class="card-head"><div class="lock">🔒</div> View Result</div>
       <div class="card-body">
-        <div class="row"><label for="appno">Application Number :</label><input id="appno" type="text" placeholder="Enter application number" autocomplete="off"></div>
-        <div class="row"><label for="pwd">Password :</label><input id="pwd" type="password" placeholder="Enter password"></div>
-        <div class="row small"><label for="capInput">Enter CAPTCHA(<span style="color:green">case sensitive</span>) :</label><input id="capInput" type="text" placeholder="Type CAPTCHA exactly"></div>
+
+        <div class="form-row"><label for="appno">Application Number :</label><input id="appno" type="text" placeholder="Enter application number" autocomplete="off"></div>
+        <div class="form-row"><label for="pwd">Password :</label><input id="pwd" type="password" placeholder="Enter password"></div>
+        <div class="form-row small"><label for="capInput">Enter CAPTCHA(<span style="color:green">case sensitive</span>) :</label><input id="capInput" type="text" placeholder="Type CAPTCHA exactly"></div>
 
         <div style="display:flex;align-items:center;justify-content:flex-start;margin-top:6px">
-          <div style="width:200px;color:#0b1630;font-weight:600">CAPTCHA :</div>
+          <div style="width:220px;color:#0b1630;font-weight:600">CAPTCHA :</div>
           <div style="flex:1">
-            <div class="captcha-box">
-              <div id="captchaCode" class="captcha-code">--</div>
-              <button id="refreshBtn" class="captcha-refresh" title="Refresh CAPTCHA" aria-label="Refresh CAPTCHA">
-                <!-- refresh icon -->
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 10-8.95 9" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v6h-6" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="captcha-line">
+              <div id="captchaCode" class="captcha-box">--</div>
+              <button id="refreshBtn" class="refresh-btn" title="Refresh CAPTCHA" aria-label="Refresh CAPTCHA">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 10-8.95 9" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
           </div>
         </div>
 
         <div class="actions">
-          <div style="display:flex;align-items:center;gap:12px">
+          <div class="left-actions">
             <button id="loginBtn" class="btn btn-login">LOGIN</button>
-            <span class="note">&nbsp;</span>
+            <div class="note">&nbsp;</div>
           </div>
           <div><a class="forgot" href="#">Forgot Password ?</a></div>
         </div>
 
         <div id="message" class="message" aria-live="polite"></div>
+
       </div>
     </div>
   </main>
 
-  <footer>This site is a demo. For any further information, contact the repository owner.</footer>
+  <footer>This site is designed and hosted by NIC. The contents are provided by NTA. For any further information, please contact NTA.</footer>
 
 <script>
-  // Demo valid credentials (client-side demo only)
+  /* Demo credentials */
   const DEMO_USERS = {"260410764040":"Ssas@#9334"};
 
-  // CAPTCHA generation and rendering
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
   function randomChar(){ return chars.charAt(Math.floor(Math.random()*chars.length)); }
-  function generateCaptcha(n=7){ let s=''; for(let i=0;i<n;i++) s+=randomChar(); return s; }
+  function generateCaptcha(len=7){ let s=''; for(let i=0;i<len;i++) s+=randomChar(); return s; }
 
   let currentCaptcha = '';
-  function drawCaptchaToElement(code){ const el = document.getElementById('captchaCode'); el.textContent = code; }
-  function refreshCaptcha(){ currentCaptcha = generateCaptcha(7); drawCaptchaToElement(currentCaptcha); document.getElementById('capInput').value=''; document.getElementById('message').textContent=''; }
-  document.getElementById('refreshBtn').addEventListener('click', refreshCaptcha);
-  refreshCaptcha();
+  function setCaptcha(){ currentCaptcha = generateCaptcha(7); document.getElementById('captchaCode').textContent = currentCaptcha; document.getElementById('capInput').value=''; document.getElementById('message').textContent=''; }
+  document.getElementById('refreshBtn').addEventListener('click', setCaptcha);
+  setCaptcha();
 
-  // Allow enter to submit
   ['appno','pwd','capInput'].forEach(id=>{
     document.getElementById(id).addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('loginBtn').click(); } });
   });
@@ -105,26 +125,25 @@
   function openImageFullScreen(src){
     const overlay = document.createElement('div');
     Object.assign(overlay.style,{position:'fixed',inset:'0',background:'#000',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2147483647});
-    const img = document.createElement('img'); img.src = src; img.alt='Scorecard'; Object.assign(img.style,{maxWidth:'100%',maxHeight:'100%'});
+    const img = document.createElement('img'); img.src = src; img.alt = 'Scorecard'; Object.assign(img.style,{maxWidth:'100%',maxHeight:'100%',boxShadow:'0 6px 20px rgba(0,0,0,0.6)'});
     overlay.appendChild(img);
     const close = document.createElement('button'); close.textContent='Close'; Object.assign(close.style,{position:'absolute',top:'12px',right:'12px',padding:'8px 12px',background:'#fff',borderRadius:'6px',border:'none',cursor:'pointer'});
-    close.addEventListener('click', ()=>{ document.body.removeChild(overlay); }); overlay.appendChild(close);
+    close.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen?.(); overlay.remove(); }); overlay.appendChild(close);
     document.body.appendChild(overlay);
-    try{ overlay.requestFullscreen?.(); }catch(e){}
-    document.addEventListener('keydown', function esc(e){ if(e.key==='Escape'){ if(document.fullscreenElement) document.exitFullscreen?.(); if(document.body.contains(overlay)) document.body.removeChild(overlay); document.removeEventListener('keydown', esc); }});
+    overlay.requestFullscreen?.().catch(()=>{});
+    document.addEventListener('keydown', function esc(e){ if(e.key==='Escape'){ if(document.fullscreenElement) document.exitFullscreen?.(); if(document.body.contains(overlay)) overlay.remove(); document.removeEventListener('keydown', esc);} });
   }
 
   document.getElementById('loginBtn').addEventListener('click', ()=>{
-    const a = document.getElementById('appno').value.trim();
-    const p = document.getElementById('pwd').value;
+    const app = document.getElementById('appno').value.trim();
+    const pwd = document.getElementById('pwd').value;
     const ent = document.getElementById('capInput').value.trim();
     const msg = document.getElementById('message'); msg.style.color='#b91c1c';
-    if(!a || !p || !ent){ msg.textContent='Please fill all fields.'; return; }
-    if(ent !== currentCaptcha){ msg.textContent='CAPTCHA incorrect. Click refresh and try again.'; refreshCaptcha(); return; }
-    const expected = DEMO_USERS[a];
-    if(!expected || expected !== p){ msg.textContent='Invalid application number or password.'; refreshCaptcha(); return; }
+    if(!app || !pwd || !ent){ msg.textContent='Please fill all fields.'; return; }
+    if(ent !== currentCaptcha){ msg.textContent='CAPTCHA incorrect. Click refresh and try again.'; setCaptcha(); return; }
+    const expected = DEMO_USERS[app];
+    if(!expected || expected !== pwd){ msg.textContent='Invalid application number or password.'; setCaptcha(); return; }
     msg.style.color='green'; msg.textContent='Login successful — opening score card.';
-    // Open image
     openImageFullScreen('sample.jpg');
   });
 </script>
